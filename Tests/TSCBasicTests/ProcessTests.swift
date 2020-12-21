@@ -111,8 +111,17 @@ class ProcessTests: XCTestCase {
 
                 """)
 
+            // Create a non-executable file to test.
+            let tempNonExecutable = tmpdir.appending(component: "program.bc")
+            try localFileSystem.writeFileContents(tempNonExecutable, bytes: """
+                @echo off
+                exit
+
+                """)
+
             try withCustomEnv(["PATH": tmpdir.pathString]) {
                 XCTAssertNotNil(Process.findExecutable("program.bat"))
+                XCTAssertNil(Process.findExecutable("program.bc"))
             }
         }
       #endif

@@ -12,7 +12,7 @@ import class Foundation.ProcessInfo
 
 #if os(Windows)
 import Foundation
-import WinSDK.core.sysinfo
+import WinSDK
 #endif
 
 @_implementationOnly import TSCclibc
