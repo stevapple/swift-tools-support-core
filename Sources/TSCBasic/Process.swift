@@ -12,6 +12,7 @@ import class Foundation.ProcessInfo
 
 #if os(Windows)
 import Foundation
+import WinSDK.core.sysinfo
 #endif
 
 @_implementationOnly import TSCclibc
@@ -324,9 +325,28 @@ public final class Process: ObjectIdentifierProtocol {
                 pathString: ProcessEnv.path,
                 currentWorkingDirectory: localFileSystem.currentWorkingDirectory
             )
+#if os(Windows)
+            var searchPaths = [String]()
+            let buffer = UnsafeMutablePointer<String>.allocate(capacity: 260)
+
+            // The 32-bit Windows system directory
+            GetSystemDirectoryW(buffer, 260)
+            searchPaths += buffer.pointee
+
+            // The 16-bit Windows system directory
+            searchPaths += "\(ProcessEnv.vars["systemdrive"] ?? "C:")\\System"
+
+            // The Windows directory
+            GetWindowsDirectoryW(buffer, 260)
+            searchPaths += buffer.pointee
+
+            searchPaths.append(contentsOf: envSearchPaths)
+#else
+            let searchPaths = envSearchPaths
+#endif
             // Lookup and cache the executable path.
             let value = lookupExecutablePath(
-                filename: program, searchPaths: envSearchPaths)
+                filename: program, searchPaths: searchPaths)
             Process.validatedExecutablesMap[program] = value
             return value
         }
