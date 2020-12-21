@@ -326,19 +326,19 @@ public final class Process: ObjectIdentifierProtocol {
                 currentWorkingDirectory: localFileSystem.currentWorkingDirectory
             )
 #if os(Windows)
-            var searchPaths = [String]()
-            let buffer = UnsafeMutablePointer<String>.allocate(capacity: 260)
+            var searchPaths = Array<AbsolutePath>()
+            var buffer = Array<WCHAR>(repeating: 0, count: Int(MAX_PATH + 1))
 
             // The 32-bit Windows system directory
-            GetSystemDirectoryW(buffer, 260)
-            searchPaths += buffer.pointee
+            GetSystemDirectoryW(&buffer, .init(MAX_PATH + 1))
+            searchPaths.append(AbsolutePath(String(decodingCString: buffer, as: UTF16.self)))
 
             // The 16-bit Windows system directory
-            searchPaths += "\(ProcessEnv.vars["systemdrive"] ?? "C:")\\System"
+            searchPaths.append(AbsolutePath("\(ProcessEnv.vars["systemdrive"] ?? "C:")\\System"))
 
             // The Windows directory
-            GetWindowsDirectoryW(buffer, 260)
-            searchPaths += buffer.pointee
+            GetWindowsDirectoryW(&buffer, .init(MAX_PATH + 1))
+            searchPaths.append(AbsolutePath(String(decodingCString: buffer, as: UTF16.self)))
 
             searchPaths.append(contentsOf: envSearchPaths)
 #else
