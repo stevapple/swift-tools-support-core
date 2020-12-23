@@ -103,16 +103,12 @@ class ProcessTests: XCTestCase {
             XCTAssertNil(Process.findExecutable("nonExistantProgram"))
             XCTAssertNil(Process.findExecutable(""))
 
-            // Create a bat file to test.
-            let tempExecutable = tmpdir.appending(component: "program.bat")
-            try localFileSystem.writeFileContents(tempExecutable, bytes: """
-                @echo off
-                exit
-
-                """)
+            // Copy an executable file to test.
+            let tempExecutable = tmpdir.appending(component: "executableProgram.exe")
+            try localFileSystem.copy(from: Process.findExecutable("cmd")!, to: tempExecutable)
 
             // Create a non-executable file to test.
-            let tempNonExecutable = tmpdir.appending(component: "program.bc")
+            let tempNonExecutable = tmpdir.appending(component: "program.bat")
             try localFileSystem.writeFileContents(tempNonExecutable, bytes: """
                 @echo off
                 exit
@@ -120,14 +116,16 @@ class ProcessTests: XCTestCase {
                 """)
 
             try withCustomEnv(["PATH": tmpdir.pathString]) {
-                XCTAssertNotNil(Process.findExecutable("program.bat"))
-                XCTAssertNil(Process.findExecutable("program.bc"))
+                XCTAssertNotNil(Process.findExecutable("executableProgram.exe"))
+                XCTAssertNotNil(Process.findExecutable("executableProgram"))
+                // Currently, Foundation treats all readable files as executable on Windows.
+                // XCTAssertNil(Process.findExecutable("program.bat"))
             }
         }
       #endif
     }
 
-  #if !os(Windows) // Foundation treats all readable files as executable on Windows.
+  #if !os(Windows) // Foundation treats all readable files as executable on Windows
     func testNonExecutableLaunch() throws {
         try testWithTemporaryDirectory { tmpdir in
             // Create a local nonexecutable file to test.

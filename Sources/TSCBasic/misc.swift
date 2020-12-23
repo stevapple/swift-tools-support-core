@@ -91,7 +91,7 @@ public func lookupExecutablePath(
     guard var value = value, !value.isEmpty else {
         return nil
     }
-    let isPath = value.contains("\\")
+    let isPath = value.contains("\\") || value.contains("/")
     if !isPath && !value.contains(".") {
         value.append(executableFileSuffix)
     }

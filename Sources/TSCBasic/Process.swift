@@ -334,7 +334,10 @@ public final class Process: ObjectIdentifierProtocol {
             searchPaths.append(AbsolutePath(String(decodingCString: buffer, as: UTF16.self)))
 
             // The 16-bit Windows system directory
-            searchPaths.append(AbsolutePath("\(ProcessEnv.vars["systemdrive"] ?? "C:")\\System"))
+            if let systemDrive = ProcessEnv.vars["systemdrive"],
+               let systemPath = try? AbsolutePath(validating: "\(systemDrive))\\System") {
+                searchPaths.append(systemPath)
+            }
 
             // The Windows directory
             GetWindowsDirectoryW(&buffer, .init(MAX_PATH + 1))
