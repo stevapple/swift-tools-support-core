@@ -118,14 +118,12 @@ class ProcessTests: XCTestCase {
             try withCustomEnv(["PATH": tmpdir.pathString]) {
                 XCTAssertNotNil(Process.findExecutable("executableProgram.exe"))
                 XCTAssertNotNil(Process.findExecutable("executableProgram"))
-                // Currently, Foundation treats all readable files as executable on Windows.
-                // XCTAssertNil(Process.findExecutable("program.bat"))
+                XCTAssertNil(Process.findExecutable("program.bat"))
             }
         }
       #endif
     }
 
-  #if !os(Windows) // Foundation treats all readable files as executable on Windows
     func testNonExecutableLaunch() throws {
         try testWithTemporaryDirectory { tmpdir in
             // Create a local nonexecutable file to test.
@@ -147,7 +145,6 @@ class ProcessTests: XCTestCase {
             }
         }
     }
-  #endif
 
   #if !os(Windows) // Signals are not supported in Windows
     func testSignals() throws {
