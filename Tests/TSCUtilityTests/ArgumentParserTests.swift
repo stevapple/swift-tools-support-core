@@ -502,7 +502,11 @@ class ArgumentParserTests: XCTestCase {
         // Test that absolute path is resolved.
         do {
             let (stdout, _) = try! TestSupportExecutable.execute(["pathArgumentTest", "/bin/echo"])
+#if os(Windows)
+            XCTAssertEqual(stdout.spm_chomp(), "\\bin\\echo")
+#else
             XCTAssertEqual(stdout.spm_chomp(), "/bin/echo")
+#endif
         }
     }
 

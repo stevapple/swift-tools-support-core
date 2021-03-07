@@ -16,12 +16,22 @@ import TSCBasic
 class PathTests: XCTestCase {
 
     func testBasics() {
+#if !os(Windows)
         XCTAssertEqual(AbsolutePath("/").pathString, "/")
         XCTAssertEqual(AbsolutePath("/a").pathString, "/a")
         XCTAssertEqual(AbsolutePath("/a/b/c").pathString, "/a/b/c")
+        XCTAssertEqual(RelativePath("a/b/c").pathString, "a/b/c")
+#else
+        XCTAssertEqual(AbsolutePath("/").pathString, "\\")
+        XCTAssertEqual(AbsolutePath("C:/a").pathString, "C:\\a")
+        XCTAssertEqual(AbsolutePath("/a/b/c").pathString, "\\a\\b\\c")
+        XCTAssertEqual(AbsolutePath(#"\\?\C://"#).pathString, #"\\?\C://"#)
         XCTAssertEqual(RelativePath(".").pathString, ".")
         XCTAssertEqual(RelativePath("a").pathString, "a")
-        XCTAssertEqual(RelativePath("a/b/c").pathString, "a/b/c")
+        XCTAssertEqual(RelativePath("a/b/c").pathString, "a\\b\\c")
+#endif
+        XCTAssertEqual(RelativePath(".").pathString, ".")
+        XCTAssertEqual(RelativePath("a").pathString, "a")
         XCTAssertEqual(RelativePath("~").pathString, "~")  // `~` is not special
     }
 

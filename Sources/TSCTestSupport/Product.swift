@@ -125,7 +125,7 @@ extension Product {
 
 public struct TestSupportProduct: Product {
     public var exec: RelativePath {
-        return RelativePath("TSCTestSupportExecutable")
+        return RelativePath("TSCTestSupportExecutable\(executableFileSuffix)")
     }
 }
 

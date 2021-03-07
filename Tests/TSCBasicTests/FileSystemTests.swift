@@ -46,7 +46,6 @@ class FileSystemTests: XCTestCase {
                 // isExecutableFile
                 let executable = tempDirPath.appending(component: "exec-foo")
                 let executableSym = tempDirPath.appending(component: "exec-sym")
-                try! fs.createSymbolicLink(executableSym, pointingAt: executable, relative: false)
                 let stream = BufferedOutputByteStream()
                 stream <<< """
                     #!/bin/sh
@@ -55,9 +54,12 @@ class FileSystemTests: XCTestCase {
 
                     """
                 try! fs.writeFileContents(executable, bytes: stream.bytes)
+                try! fs.createSymbolicLink(executableSym, pointingAt: executable, relative: false)
+#if !os(Windows)
                 try! Process.checkNonZeroExit(args: "chmod", "+x", executable.pathString)
                 XCTAssertTrue(fs.isExecutableFile(executable))
                 XCTAssertTrue(fs.isExecutableFile(executableSym))
+#endif
                 XCTAssertTrue(fs.isSymlink(executableSym))
                 XCTAssertFalse(fs.isExecutableFile(sym))
                 XCTAssertFalse(fs.isExecutableFile(file.path))
@@ -97,15 +99,21 @@ class FileSystemTests: XCTestCase {
             let slnkPath = tmpDirPath.appending(component: "slnk")
             let fldrPath = tmpDirPath.appending(component: "fldr")
 
+#if !os(Windows)
             // Create a symbolic link pointing at the (so far non-existent) directory.
             try! localFileSystem.createSymbolicLink(slnkPath, pointingAt: fldrPath, relative: true)
 
             // Resolving the symlink should not yet change anything.
             XCTAssertEqual(resolveSymlinks(slnkPath), slnkPath)
-
+#endif
             // Create a directory to be the referent of the symbolic link.
             try! makeDirectories(fldrPath)
 
+#if os(Windows)
+            // We can only create a symbolic link pointing at an existing directory
+            // on Windows.
+            try! localFileSystem.createSymbolicLink(slnkPath, pointingAt: fldrPath, relative: true)
+#endif
             // Resolving the symlink should now point at the directory.
             XCTAssertEqual(resolveSymlinks(slnkPath), fldrPath)
 

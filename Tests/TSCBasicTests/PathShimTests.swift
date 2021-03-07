@@ -34,7 +34,11 @@ class PathShimTests : XCTestCase {
 class WalkTests : XCTestCase {
 
     func testNonRecursive() {
-      #if os(Android)
+      #if os(Windows)
+        let root = ""
+        var expected = [AbsolutePath]()
+        return
+      #elseif os(Android)
         let root = "/system"
         var expected = [
             AbsolutePath("\(root)/usr"),

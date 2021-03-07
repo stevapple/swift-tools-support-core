@@ -139,6 +139,9 @@ class TemporaryFileTests: XCTestCase {
 
     /// Check that the temporary file doesn't leak file descriptors.
     func testLeaks() throws {
+#if os(Windows)
+        throw XCTSkip("'fileDescriptor' is unavailable in Windows")
+#else
         // We check this by testing that we get back the same FD after a
         // sequence of creating and destroying TemporaryFile objects. I don't
         // believe that this is guaranteed by POSIX, but it is true on all
@@ -149,5 +152,6 @@ class TemporaryFileTests: XCTestCase {
         }
         let endFD = try Int(withTemporaryFile { return $0.fileHandle.fileDescriptor })
         XCTAssertEqual(initialFD, endFD)
+#endif
     }
 }

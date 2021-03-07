@@ -15,6 +15,9 @@ import TSCBasic
 class miscTests: XCTestCase {
 
     func testExecutableLookup() throws {
+#if os(Windows)
+        throw XCTSkip()
+#endif
         try testWithTemporaryDirectory { path in
             
             let pathEnv1 = path.appending(component: "pathEnv1")
@@ -48,8 +51,13 @@ class miscTests: XCTestCase {
     }
     
     func testEnvSearchPaths() throws {
+        #if os(Windows)
+        let searchPaths = "something;.;abc/../.build/debug;/usr/bin;/bin"
+        #else
+        let searchPaths = "something:.:abc/../.build/debug:/usr/bin:/bin/"
+        #endif
         let cwd = AbsolutePath("/dummy")
-        let paths = getEnvSearchPaths(pathString: "something:.:abc/../.build/debug:/usr/bin:/bin/", currentWorkingDirectory: cwd)
+        let paths = getEnvSearchPaths(pathString: searchPaths, currentWorkingDirectory: cwd)
         XCTAssertEqual(paths, ["/dummy/something", "/dummy", "/dummy/.build/debug", "/usr/bin", "/bin"].map({AbsolutePath($0)}))
     }
     
